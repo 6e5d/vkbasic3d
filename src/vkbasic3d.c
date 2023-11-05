@@ -7,19 +7,18 @@
 #include "../include/pipeline.h"
 #include "../include/vkbasic3d.h"
 
-#include <stdio.h>
-#define X(n) printf("X %d\n", n);
 Vkbasic3d* vkbasic3d_new(Vkbasic* vb) {
 	Vkbasic3d* vb3 = malloc(sizeof(Vkbasic3d));
 	vb3->renderpass = vkbasic3d_renderpass(
 		vb->device,
 		vb->scsi.format.format
 	);
-	vb3->pipeline = vkbasic3d_pipeline_new(vb->device, vb3->renderpass);
+	vkbasic3d_pipeline_new(vb3, vb->device);
 	return vb3;
 }
 
 void vkbasic3d_destroy(Vkbasic3d* vb3, VkDevice device) {
+	vkDestroyPipelineLayout(device, vb3->pipelinelayout, NULL);
 	vkDestroyPipeline(device, vb3->pipeline, NULL);
 	vkDestroyRenderPass(device, vb3->renderpass, NULL);
 	free(vb3);

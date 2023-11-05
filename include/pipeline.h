@@ -1,6 +1,8 @@
 #include <vulkan/vulkan.h>
 
-VkPipeline vkbasic3d_pipeline_new(
-	VkDevice device,
-	VkRenderPass renderpass
+#include "../include/vkbasic3d.h"
+
+void vkbasic3d_pipeline_new(
+	Vkbasic3d* vb3,
+	VkDevice device
 );
