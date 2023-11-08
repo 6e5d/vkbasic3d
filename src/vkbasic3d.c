@@ -11,7 +11,8 @@ Vkbasic3d* vkbasic3d_new(Vkbasic* vb) {
 	Vkbasic3d* vb3 = malloc(sizeof(Vkbasic3d));
 	vb3->renderpass = vkbasic3d_renderpass(
 		vb->device,
-		vb->scsi.format.format
+		vb->scsi.format.format,
+		vb->depth_format
 	);
 	vkbasic3d_pipeline_new(vb3, vb->device);
 	return vb3;
@@ -39,7 +40,14 @@ void vkbasic3d_build_command(
 		vkbasic_check(vkBeginCommandBuffer(commandbuffer, &info));
 	}
 
-	static VkClearValue clearValue = {{{0.0f, 0.2f, 0.0f, 1.0f}}};
+	static const VkClearValue clear_color = {
+		.color.float32 = {0.0f, 0.2f, 0.0f, 1.0f},
+	};
+	static const VkClearValue clear_depthstencil = {
+		.depthStencil.depth = 0,
+		.depthStencil.stencil = 0.0,
+	};
+	VkClearValue clear_values[2] = {clear_color, clear_depthstencil};
 
 	{
 		VkRenderPassBeginInfo info = {
@@ -50,8 +58,8 @@ void vkbasic3d_build_command(
 			.renderArea.offset.y = 0,
 			.renderArea.extent.width = width,
 			.renderArea.extent.height = height,
-			.clearValueCount = 1,
-			.pClearValues = &clearValue,
+			.clearValueCount = 2,
+			.pClearValues = clear_values,
 		};
 		vkCmdBeginRenderPass(
 			commandbuffer,

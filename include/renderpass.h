@@ -2,5 +2,6 @@
 
 VkRenderPass vkbasic3d_renderpass(
 	VkDevice device,
-	VkFormat format
+	VkFormat format,
+	VkFormat depth_format
 );
