@@ -19,15 +19,15 @@ void vkbasic3d_pipeline_new(
 	path = ppath_rel_new(__FILE__, "../../shader/test_frag.spv");
 	VkShaderModule frag = vkhelper_shader_module(device, path);
 	free(path);
-	VkbasicPipelineConf* conf = vkbasic_pipeline_configure(vert, frag);
-	vkbasic_pipeline_standard(
+	VkhelperPipelineConf conf;
+	vkhelper_pipeline_configure(&conf, vert, frag);
+	vkhelper_pipeline_standard(
 		&vb3->pipeline,
 		&vb3->pipelinelayout,
-		conf,
+		&conf,
 		vb3->renderpass,
 		device
 	);
-	free(conf);
 	vkDestroyShaderModule(device, frag, NULL);
 	vkDestroyShaderModule(device, vert, NULL);
 }

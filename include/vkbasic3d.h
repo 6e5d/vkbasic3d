@@ -4,11 +4,14 @@
 #include <vulkan/vulkan.h>
 
 #include "../../vkbasic/include/vkbasic.h"
+#include "../../vkhelper/include/buffer.h"
 
 typedef struct {
 	VkRenderPass renderpass;
 	VkPipeline pipeline;
 	VkPipelineLayout pipelinelayout;
+	VkhelperBuffer vbuf;
+	VkhelperBuffer ibuf;
 } Vkbasic3d;
 
 void vkbasic3d_init(Vkbasic3d* vb3, Vkstatic* vks);

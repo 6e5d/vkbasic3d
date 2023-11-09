@@ -4,22 +4,27 @@
 
 #include "../../vkstatic/include/vkstatic.h"
 #include "../../vkhelper/include/renderpass.h"
+#include "../../vkhelper/include/buffer.h"
 #include "../include/pipeline.h"
 #include "../include/vkbasic3d.h"
 
 void vkbasic3d_init(Vkbasic3d* vb3, Vkstatic* vs) {
 	vb3->renderpass = vkhelper_renderpass(
 		vs->device,
-		vs->scsi.format.format,
+		vs->surface_format.format,
 		vs->depth_format
 	);
 	vkbasic3d_pipeline_new(vb3, vs->device);
+	vkhelper_buffer_init(&vb3->vbuf, 10000, vs->device, vs->memprop);
+	vkhelper_buffer_init(&vb3->ibuf, 10000, vs->device, vs->memprop);
 }
 
 void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
 	vkDestroyPipelineLayout(device, vb3->pipelinelayout, NULL);
 	vkDestroyPipeline(device, vb3->pipeline, NULL);
 	vkDestroyRenderPass(device, vb3->renderpass, NULL);
+	vkhelper_buffer_deinit(&vb3->vbuf, device);
+	vkhelper_buffer_deinit(&vb3->ibuf, device);
 }
 
 void vkbasic3d_build_command(
