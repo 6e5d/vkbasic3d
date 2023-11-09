@@ -2,27 +2,24 @@
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 
-#include "../../vkbasic/include/vkbasic.h"
-#include "../include/renderpass.h"
+#include "../../vkstatic/include/vkstatic.h"
+#include "../../vkhelper/include/renderpass.h"
 #include "../include/pipeline.h"
 #include "../include/vkbasic3d.h"
 
-Vkbasic3d* vkbasic3d_new(Vkbasic* vb) {
-	Vkbasic3d* vb3 = malloc(sizeof(Vkbasic3d));
-	vb3->renderpass = vkbasic3d_renderpass(
-		vb->device,
-		vb->scsi.format.format,
-		vb->depth_format
+void vkbasic3d_init(Vkbasic3d* vb3, Vkstatic* vs) {
+	vb3->renderpass = vkhelper_renderpass(
+		vs->device,
+		vs->scsi.format.format,
+		vs->depth_format
 	);
-	vkbasic3d_pipeline_new(vb3, vb->device);
-	return vb3;
+	vkbasic3d_pipeline_new(vb3, vs->device);
 }
 
-void vkbasic3d_destroy(Vkbasic3d* vb3, VkDevice device) {
+void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
 	vkDestroyPipelineLayout(device, vb3->pipelinelayout, NULL);
 	vkDestroyPipeline(device, vb3->pipeline, NULL);
 	vkDestroyRenderPass(device, vb3->renderpass, NULL);
-	free(vb3);
 }
 
 void vkbasic3d_build_command(

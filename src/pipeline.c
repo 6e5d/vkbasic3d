@@ -5,7 +5,7 @@
 
 #include "../include/pipeline.h"
 #include "../include/vkbasic3d.h"
-#include "../../vkbasic/include/pipeline.h"
+#include "../../vkhelper/include/pipeline.h"
 #include "../../vkhelper/include/shader.h"
 #include "../../ppath/include/ppath.h"
 

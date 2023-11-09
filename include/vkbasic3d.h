@@ -11,8 +11,8 @@ typedef struct {
 	VkPipelineLayout pipelinelayout;
 } Vkbasic3d;
 
-Vkbasic3d* vkbasic3d_new(Vkbasic* vb);
-void vkbasic3d_destroy(Vkbasic3d* vb3, VkDevice device);
+void vkbasic3d_init(Vkbasic3d* vb3, Vkstatic* vks);
+void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device);
 
 void vkbasic3d_build_command(
 	Vkbasic3d* vb3,
