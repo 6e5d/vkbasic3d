@@ -1,7 +1,7 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 
-#include "../../vkbasic/include/common.h"
 #include "../../vkbasic/include/vkbasic.h"
 #include "../include/renderpass.h"
 #include "../include/pipeline.h"
@@ -37,7 +37,7 @@ void vkbasic3d_build_command(
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
 			.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
 		};
-		vkbasic_check(vkBeginCommandBuffer(commandbuffer, &info));
+		assert(0 == vkBeginCommandBuffer(commandbuffer, &info));
 	}
 
 	static const VkClearValue clear_color = {

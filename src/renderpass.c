@@ -1,8 +1,8 @@
+#include <assert.h>
 #include <stdint.h>
 #include <vulkan/vulkan.h>
 
 #include "../include/renderpass.h"
-#include "../../vkbasic/include/common.h"
 
 VkRenderPass vkbasic3d_renderpass(
 	VkDevice device,
@@ -54,7 +54,7 @@ VkRenderPass vkbasic3d_renderpass(
 		.subpassCount = 1,
 		.pSubpasses = &subpass,
 	};
-	vkbasic_check(vkCreateRenderPass(
+	assert(0 == vkCreateRenderPass(
 		device, &createInfo, NULL, &result));
 	return result;
 }
