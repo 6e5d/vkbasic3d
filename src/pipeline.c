@@ -26,7 +26,7 @@ void vkbasic3d_pipeline_new(
 	vkhelper_pipeline_configure(&conf, vert, frag);
 	vb3->vib = (VkVertexInputBindingDescription) {
 		.binding = 0,
-		.stride = 32,
+		.stride = 56,
 		.inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
 	};
 

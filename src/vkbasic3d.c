@@ -30,24 +30,11 @@ void vkbasic3d_init(
 		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 		vs->device, vs->memprop);
 	vkhelper_buffer_init(
-		&vb3->ibuf, sizeof(uint32_t) * VKBASIC3D_MAX_INDEX,
-		VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-		vs->device, vs->memprop);
-	vkhelper_buffer_init(
 		&vb3->ubuf, sizeof(Vkbasic3dCamera),
 		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		vs->device, vs->memprop);
-	vkhelper_buffer_map(vs->device, (void**)&vb3->camera, &vb3->ubuf);
-	glm_perspective(0.8f, 1.6f, 0.01f, 4.0f, vb3->camera->proj);
-	vec3 eye = {3.0f, 0.0f, 3.0f};
-	vec3 center = {0.0f, 0.0f, 0.0f};
-	vec3 up = {0.0f, 1.0f, 0.0f};
-	glm_lookat(eye, center, up, vb3->camera->view);
-	for (size_t ix = 0; ix < 16; ix += 1) {
-		printf("%f ", ((float*)vb3->camera->proj)[ix]);
-		printf("%f\n", ((float*)vb3->camera->view)[ix]);
-	}
-	vkhelper_buffer_unmap(vs->device, &vb3->ubuf);
+	assert(0 == vkMapMemory(vs->device, vb3->ubuf.smemory, 0,
+		vb3->ubuf.ssize, 0, (void**)&vb3->camera));
 	vkhelper_buffer_sync(&vb3->ubuf, sizeof(Vkbasic3dCamera),
 		vs->device, vs->queue, vs->cpool);
 	VkDescriptorPoolSize poolsize = {
@@ -95,7 +82,6 @@ void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
 	vkDestroyDescriptorPool(device, vb3->descpool, NULL);
 	vkhelper_buffer_deinit(&vb3->ubuf, device);
 	vkhelper_buffer_deinit(&vb3->vbuf, device);
-	vkhelper_buffer_deinit(&vb3->ibuf, device);
 }
 
 void vkbasic3d_build_command(
@@ -112,7 +98,9 @@ void vkbasic3d_build_command(
 		};
 		assert(0 == vkBeginCommandBuffer(commandbuffer, &info));
 	}
-
+	VkBufferCopy copy = { .size = 128 };
+	vkCmdCopyBuffer(commandbuffer, vb3->ubuf.sbuffer, vb3->ubuf.buffer,
+		1, &copy);
 	static const VkClearValue clear_color = {
 		.color.float32 = {0.0f, 0.1f, 0.1f, 1.0f},
 	};
@@ -161,11 +149,8 @@ void vkbasic3d_build_command(
 	vb3->scissor = (VkRect2D) {{0.0f, 0.0f}, {1e5f, 1e5f}};
 	vkCmdSetViewport(commandbuffer, 0, 1, &vb3->viewport);
 	vkCmdSetScissor(commandbuffer, 0, 1, &vb3->scissor);
-
 	vkCmdBindVertexBuffers(commandbuffer, 0, 1,
 		&vb3->vbuf.buffer, &vb3->zero);
-	vkCmdBindIndexBuffer(commandbuffer, vb3->ibuf.buffer, 0,
-		VK_INDEX_TYPE_UINT32);
-	vkCmdDrawIndexed(commandbuffer, vb3->index_len, 1, 0, 0, 1);
+	vkCmdDraw(commandbuffer, vb3->vlen, 1, 0, 0);
 	vkCmdEndRenderPass(commandbuffer);
 }

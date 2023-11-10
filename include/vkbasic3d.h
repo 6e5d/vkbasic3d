@@ -8,20 +8,18 @@
 #include "../../vkbasic/include/vkbasic.h"
 #include "../../vkhelper/include/buffer.h"
 
-static const size_t VKBASIC3D_MAX_VERTEX = 10000;
-static const size_t VKBASIC3D_MAX_INDEX = 50000;
+static const size_t VKBASIC3D_MAX_VERTEX = 100000;
 
 typedef struct {
 	VkRenderPass renderpass;
 	VkPipeline pipeline;
 	VkPipelineLayout pipelinelayout;
 	VkhelperBuffer vbuf;
-	VkhelperBuffer ibuf;
 	VkhelperBuffer ubuf;
 	VkVertexInputBindingDescription vib;
 	VkVertexInputAttributeDescription via[5];
 	VkDeviceSize zero;
-	uint32_t index_len;
+	uint32_t vlen;
 	Vkbasic3dCamera* camera; // mapped
 	VkDescriptorPool descpool;
 	VkDescriptorSetLayout descset_layout;

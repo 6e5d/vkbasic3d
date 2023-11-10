@@ -17,9 +17,9 @@ layout(location = 0) out vec4 o_color;
 void main() {
 	// both need to be normalized
 	// float diff = dot(f_norm, light.direction);
-	float diff = dot(f_norm, vec3(0.0, 1.0, 0.0));
+	float diff = dot(f_norm, vec3(0.0, 0.0, 1.0));
 	// B: give some diffusion even at back side
-	const float B = 0.5;
+	const float B = 0.6;
 	if (diff < 0) {
 		diff = B * (diff + 1.0);
 	} else {
