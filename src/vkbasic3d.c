@@ -24,6 +24,23 @@ void vkbasic3d_init(
 		vs->surface_format.format,
 		vs->depth_format
 	);
+	// descset layout
+	VkDescriptorSetLayoutBinding setbinding = {
+		.binding = 0,
+		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		.descriptorCount = 1,
+		.stageFlags = VK_SHADER_STAGE_VERTEX_BIT |
+			VK_SHADER_STAGE_FRAGMENT_BIT,
+	};
+	VkDescriptorSetLayoutCreateInfo info = {
+		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+		.pNext = NULL,
+		.flags = 0,
+		.bindingCount = 1,
+		.pBindings = &setbinding,
+	};
+	assert(0 == vkCreateDescriptorSetLayout(
+		vs->device, &info, NULL, &vb3->descset_layout));
 	vkbasic3d_pipeline_new(vb3, vs->device);
 	vkhelper_buffer_init(
 		&vb3->vbuf, sizeof(Vkbasic3dVertex) * VKBASIC3D_MAX_VERTEX,
@@ -77,6 +94,8 @@ void vkbasic3d_init(
 void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
 	vkDestroyPipelineLayout(device, vb3->pipelinelayout, NULL);
 	vkDestroyPipeline(device, vb3->pipeline, NULL);
+	vkDestroyPipelineLayout(device, vb3->pipelineglayout, NULL);
+	vkDestroyPipeline(device, vb3->pipelineg, NULL);
 	vkDestroyRenderPass(device, vb3->renderpass, NULL);
 	vkDestroyDescriptorSetLayout(device, vb3->descset_layout, NULL);
 	vkDestroyDescriptorPool(device, vb3->descpool, NULL);
@@ -98,11 +117,11 @@ void vkbasic3d_build_command(
 		};
 		assert(0 == vkBeginCommandBuffer(commandbuffer, &info));
 	}
-	VkBufferCopy copy = { .size = 128 };
+	VkBufferCopy copy = { .size = sizeof(Vkbasic3dCamera) };
 	vkCmdCopyBuffer(commandbuffer, vb3->ubuf.sbuffer, vb3->ubuf.buffer,
 		1, &copy);
 	static const VkClearValue clear_color = {
-		.color.float32 = {0.0f, 0.1f, 0.1f, 1.0f},
+		.color.float32 = {0.0f, 0.0f, 0.0f, 1.0f},
 	};
 	static const VkClearValue clear_depthstencil = {
 		.depthStencil.depth = 1.0,
@@ -128,6 +147,13 @@ void vkbasic3d_build_command(
 			VK_SUBPASS_CONTENTS_INLINE
 		);
 	}
+	vb3->viewport = (VkViewport) {
+		0.0f, 0.0f, (float)width, (float)height,
+		0.0, 1.0,
+	};
+	vb3->scissor = (VkRect2D) {{0.0f, 0.0f}, {1e5f, 1e5f}};
+	vkCmdSetViewport(commandbuffer, 0, 1, &vb3->viewport);
+	vkCmdSetScissor(commandbuffer, 0, 1, &vb3->scissor);
 	vkCmdBindPipeline(
 		commandbuffer,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -141,16 +167,23 @@ void vkbasic3d_build_command(
 		&vb3->descset,
 		0, NULL
 	);
-
-	vb3->viewport = (VkViewport) {
-		0.0f, 0.0f, (float)width, (float)height,
-		0.0, 1.0,
-	};
-	vb3->scissor = (VkRect2D) {{0.0f, 0.0f}, {1e5f, 1e5f}};
-	vkCmdSetViewport(commandbuffer, 0, 1, &vb3->viewport);
-	vkCmdSetScissor(commandbuffer, 0, 1, &vb3->scissor);
 	vkCmdBindVertexBuffers(commandbuffer, 0, 1,
 		&vb3->vbuf.buffer, &vb3->zero);
 	vkCmdDraw(commandbuffer, vb3->vlen, 1, 0, 0);
+	vkCmdNextSubpass(commandbuffer, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindPipeline(
+		commandbuffer,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		vb3->pipelineg
+	);
+	vkCmdBindDescriptorSets(
+		commandbuffer,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		vb3->pipelinelayout,
+		0, 1,
+		&vb3->descset,
+		0, NULL
+	);
+	vkCmdDraw(commandbuffer, 6, 1, 0, 0);
 	vkCmdEndRenderPass(commandbuffer);
 }

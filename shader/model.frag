@@ -9,29 +9,30 @@ layout(location = 3) in vec2 f_tex_coord;
 layout(location = 0) out vec4 o_color;
 
 // layout(set = 1, binding = 0) uniform sampler2D tex[];
-// layout(push_constant) uniform Light {
-// 	vec3 color;
-// 	vec3 direction;
-// } light;
+layout(set = 0, binding = 0) uniform Data {
+	mat4 view;
+	mat4 proj;
+	vec3 direction;
+} uniforms;
 
 void main() {
 	// both need to be normalized
-	// float diff = dot(f_norm, light.direction);
-	float diff = dot(f_norm, vec3(0.0, 0.0, 1.0));
+	float diff = dot(f_norm, uniforms.direction);
 	// B: give some diffusion even at back side
-	const float B = 0.6;
+	const float B = 0.2;
 	if (diff < 0) {
 		diff = B * (diff + 1.0);
 	} else {
 		diff = (1 - B) * diff + B;
 	}
-	// vec3 color = (0.8 * diff + 0.2) * light.color;
-	vec3 color = (0.8 * diff + 0.2) * vec3(1.0, 1.0, 1.0);
+	vec3 light_color = vec3(1.0, 1.0, 1.0);
+	vec3 color = (0.8 * diff + 0.2) * light_color;
 
 	// if (f_tex_layer >= 0) {
 	// 	o_color = texture(nonuniformEXT(tex[f_tex_layer]), f_tex_coord); } else {
 	// }
-	o_color = vec4(0.0, 0.0, 0.0, 1.0);
-	o_color.xyz = f_color.w * f_color.xyz + (1.0 - f_color.w) * o_color.xyz;
-	o_color *= vec4(color, 1.0);
+	o_color.xyz = color *
+		(f_color.w * f_color.xyz +
+		(1.0 - f_color.w) * o_color.xyz);
+	o_color.w = 1.0;
 }

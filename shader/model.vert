@@ -14,6 +14,7 @@ layout(location = 3) out vec2 f_tex_coord;
 layout(set = 0, binding = 0) uniform Data {
 	mat4 view;
 	mat4 proj;
+	vec3 direction;
 } uniforms;
 
 mat4 view2 = {

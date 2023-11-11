@@ -14,6 +14,8 @@ typedef struct {
 	VkRenderPass renderpass;
 	VkPipeline pipeline;
 	VkPipelineLayout pipelinelayout;
+	VkPipeline pipelineg;
+	VkPipelineLayout pipelineglayout;
 	VkhelperBuffer vbuf;
 	VkhelperBuffer ubuf;
 	VkVertexInputBindingDescription vib;

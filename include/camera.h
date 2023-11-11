@@ -6,6 +6,7 @@
 typedef struct {
 	mat4 view;
 	mat4 proj;
+	vec3 direction;
 } Vkbasic3dCamera;
 
 #endif

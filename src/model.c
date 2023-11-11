@@ -27,7 +27,6 @@ void vkbasic3d_model_upload(
 		for (size_t idy = 0; idy < 3; idy += 1) {
 			Vkbasic3dVertex* v = &target[idx * 3 + idy];
 			size_t vid = chk(f->vids[idy]);
-			printf("%zu\n", vid);
 			size_t nid = chk(f->nids[idy]);
 			*v = (Vkbasic3dVertex) {
 				.color = {0.5, 0.5, 0.5, 1.0},

@@ -15,14 +15,38 @@ void vkbasic3d_pipeline_new(
 	Vkbasic3d* vb3,
 	VkDevice device
 ) {
-	char* path = ppath_rel_new(__FILE__, "../../shader/model_vert.spv");
-	VkShaderModule vert = vkhelper_shader_module(device, path);
-	free(path);
-	path = ppath_rel_new(__FILE__, "../../shader/model_frag.spv");
-	VkShaderModule frag = vkhelper_shader_module(device, path);
-	free(path);
+	char* path;
+	VkShaderModule vert, frag;
 	VkhelperPipelineConf conf;
 
+	// grid
+	path = ppath_rel_new(__FILE__, "../../shader/grid_vert.spv");
+	vert = vkhelper_shader_module(device, path);
+	free(path);
+	path = ppath_rel_new(__FILE__, "../../shader/grid_frag.spv");
+	frag = vkhelper_shader_module(device, path);
+	free(path);
+	vkhelper_pipeline_configure(&conf, vert, frag);
+	conf.pl.setLayoutCount = 1;
+	conf.pl.pSetLayouts = &vb3->descset_layout;
+	vkhelper_pipeline_standard(
+		&vb3->pipelineg,
+		&vb3->pipelineglayout,
+		&conf,
+		vb3->renderpass,
+		device,
+		1
+	);
+	vkDestroyShaderModule(device, frag, NULL);
+	vkDestroyShaderModule(device, vert, NULL);
+
+	// model
+	path = ppath_rel_new(__FILE__, "../../shader/model_vert.spv");
+	vert = vkhelper_shader_module(device, path);
+	free(path);
+	path = ppath_rel_new(__FILE__, "../../shader/model_frag.spv");
+	frag = vkhelper_shader_module(device, path);
+	free(path);
 	vkhelper_pipeline_configure(&conf, vert, frag);
 	vb3->vib = (VkVertexInputBindingDescription) {
 		.binding = 0,
@@ -65,22 +89,6 @@ void vkbasic3d_pipeline_new(
 	conf.vis.vertexAttributeDescriptionCount = 5;
 	conf.vis.pVertexAttributeDescriptions = vb3->via;
 
-	// descset layout
-	VkDescriptorSetLayoutBinding setbinding = {
-		.binding = 0,
-		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		.descriptorCount = 1,
-		.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-	};
-	VkDescriptorSetLayoutCreateInfo info = {
-		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-		.pNext = NULL,
-		.flags = 0,
-		.bindingCount = 1,
-		.pBindings = &setbinding,
-	};
-	assert(0 == vkCreateDescriptorSetLayout(
-		device, &info, NULL, &vb3->descset_layout));
 	conf.pl.setLayoutCount = 1;
 	conf.pl.pSetLayouts = &vb3->descset_layout;
 
@@ -89,7 +97,8 @@ void vkbasic3d_pipeline_new(
 		&vb3->pipelinelayout,
 		&conf,
 		vb3->renderpass,
-		device
+		device,
+		0
 	);
 	vkDestroyShaderModule(device, frag, NULL);
 	vkDestroyShaderModule(device, vert, NULL);
