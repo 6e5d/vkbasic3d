@@ -120,6 +120,13 @@ void vkbasic3d_build_command(
 	VkBufferCopy copy = { .size = sizeof(Vkbasic3dCamera) };
 	vkCmdCopyBuffer(commandbuffer, vb3->ubuf.sbuffer, vb3->ubuf.buffer,
 		1, &copy);
+	if (vb3->vertex_update) {
+		// printf("vertex update\n");
+		copy.size = vb3->vlen * sizeof(Vkbasic3dVertex);
+		vkCmdCopyBuffer(commandbuffer,
+			vb3->vbuf.sbuffer, vb3->vbuf.buffer, 1, &copy);
+		vb3->vertex_update = false;
+	}
 	static const VkClearValue clear_color = {
 		.color.float32 = {0.0f, 0.0f, 0.0f, 1.0f},
 	};

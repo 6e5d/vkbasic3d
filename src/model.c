@@ -38,6 +38,5 @@ void vkbasic3d_model_upload(
 	}
 	vkUnmapMemory(vs->device, vb3->vbuf.smemory);
 	vb3->vlen = (uint32_t)model->f_len * 3;
-	vkhelper_buffer_sync(&vb3->vbuf, sizeof(Vkbasic3dVertex) * vb3->vlen,
-		vs->device, vs->queue, vs->cpool);
+	vb3->vertex_update = true;
 }

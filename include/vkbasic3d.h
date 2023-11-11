@@ -22,6 +22,7 @@ typedef struct {
 	VkVertexInputAttributeDescription via[5];
 	VkDeviceSize zero;
 	uint32_t vlen;
+	bool vertex_update;
 	Vkbasic3dCamera* camera; // mapped
 	VkDescriptorPool descpool;
 	VkDescriptorSetLayout descset_layout;
