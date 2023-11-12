@@ -1,8 +1,9 @@
-#ifndef _VKBASIC3D_VKBASIC3DH
-#define _VKBASIC3D_VKBASIC3DH
+#ifndef INCLUDEGUARD_VKBASIC3D_VKBASIC3DH
+#define INCLUDEGUARD_VKBASIC3D_VKBASIC3DH
 
 #include <vulkan/vulkan.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "../include/camera.h"
 #include "../../vkbasic/include/vkbasic.h"
@@ -23,12 +24,11 @@ typedef struct {
 	VkDeviceSize zero;
 	uint32_t vlen;
 	bool vertex_update;
+	bool recreate_pipeline;
 	Vkbasic3dCamera* camera; // mapped
 	VkDescriptorPool descpool;
 	VkDescriptorSetLayout descset_layout;
 	VkDescriptorSet descset;
-	VkViewport viewport;
-	VkRect2D scissor;
 } Vkbasic3d;
 
 void vkbasic3d_init(Vkbasic3d* vb3, Vkstatic* vks);
@@ -36,6 +36,7 @@ void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device);
 
 void vkbasic3d_build_command(
 	Vkbasic3d* vb3,
+	VkDevice device,
 	VkCommandBuffer commandbuffer,
 	VkFramebuffer framebuffer,
 	uint32_t width,

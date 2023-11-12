@@ -19,6 +19,7 @@ void vkbasic3d_init(
 	Vkstatic* vs
 ) {
 	vb3->zero = 0;
+	vb3->recreate_pipeline = true;
 	vb3->renderpass = vkhelper_renderpass(
 		vs->device,
 		vs->surface_format.format,
@@ -41,7 +42,6 @@ void vkbasic3d_init(
 	};
 	assert(0 == vkCreateDescriptorSetLayout(
 		vs->device, &info, NULL, &vb3->descset_layout));
-	vkbasic3d_pipeline_new(vb3, vs->device);
 	vkhelper_buffer_init(
 		&vb3->vbuf, sizeof(Vkbasic3dVertex) * VKBASIC3D_MAX_VERTEX,
 		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
@@ -92,10 +92,7 @@ void vkbasic3d_init(
 }
 
 void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
-	vkDestroyPipelineLayout(device, vb3->pipelinelayout, NULL);
-	vkDestroyPipeline(device, vb3->pipeline, NULL);
-	vkDestroyPipelineLayout(device, vb3->pipelineglayout, NULL);
-	vkDestroyPipeline(device, vb3->pipelineg, NULL);
+	vkbasic3d_pipeline_destroy(vb3, device);
 	vkDestroyRenderPass(device, vb3->renderpass, NULL);
 	vkDestroyDescriptorSetLayout(device, vb3->descset_layout, NULL);
 	vkDestroyDescriptorPool(device, vb3->descpool, NULL);
@@ -105,11 +102,19 @@ void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
 
 void vkbasic3d_build_command(
 	Vkbasic3d* vb3,
+	VkDevice device,
 	VkCommandBuffer commandbuffer,
 	VkFramebuffer framebuffer,
 	uint32_t width,
 	uint32_t height
 ) {
+	if (vb3->recreate_pipeline) {
+		if (vb3->pipeline != VK_NULL_HANDLE) {
+			vkbasic3d_pipeline_destroy(vb3, device);
+		}
+		vkbasic3d_pipeline_new(vb3, device, width, height);
+		vb3->recreate_pipeline = false;
+	}
 	{
 		VkCommandBufferBeginInfo info = {
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -154,13 +159,7 @@ void vkbasic3d_build_command(
 			VK_SUBPASS_CONTENTS_INLINE
 		);
 	}
-	vb3->viewport = (VkViewport) {
-		0.0f, 0.0f, (float)width, (float)height,
-		0.0, 1.0,
-	};
-	vb3->scissor = (VkRect2D) {{0.0f, 0.0f}, {1e5f, 1e5f}};
-	vkCmdSetViewport(commandbuffer, 0, 1, &vb3->viewport);
-	vkCmdSetScissor(commandbuffer, 0, 1, &vb3->scissor);
+
 	vkCmdBindPipeline(
 		commandbuffer,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,

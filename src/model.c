@@ -7,6 +7,7 @@
 #include "../../vkhelper/include/buffer.h"
 #include "../include/vkbasic3d.h"
 #include "../include/vertex.h"
+#include "../include/model.h"
 
 static size_t chk(int32_t v) {
 	assert(v >= 0);
@@ -18,7 +19,7 @@ void vkbasic3d_model_upload(
 	Vkbasic3d* vb3,
 	Modelobj* model
 ) {
-	// TODO: check length limit
+	assert(model->v_len <= VKBASIC3D_MAX_VERTEX);
 	Vkbasic3dVertex* target;
 	assert(0 == vkMapMemory(vs->device, vb3->vbuf.smemory, 0,
 		vb3->vbuf.ssize, 0, (void**)&target));

@@ -1,5 +1,5 @@
-#ifndef _VKBASIC3D_CAMERA
-#define _VKBASIC3D_CAMERA
+#ifndef INCLUDEGUARD_VKBASIC3D_CAMERA
+#define INCLUDEGUARD_VKBASIC3D_CAMERA
 
 #include <cglm/cglm.h>
 
