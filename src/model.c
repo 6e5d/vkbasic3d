@@ -2,12 +2,12 @@
 #include <string.h>
 #include <vulkan/vulkan.h>
 
-#include "../../vkstatic/include/vkstatic.h"
 #include "../../modelobj/include/modelobj.h"
 #include "../../vkhelper/include/buffer.h"
-#include "../include/vkbasic3d.h"
-#include "../include/vertex.h"
+#include "../../vkstatic/include/vkstatic.h"
 #include "../include/model.h"
+#include "../include/vertex.h"
+#include "../include/vkbasic3d.h"
 
 static size_t chk(int32_t v) {
 	assert(v >= 0);
@@ -30,10 +30,10 @@ void vkbasic3d_model_upload(
 			size_t vid = chk(f->vids[idy]);
 			size_t nid = chk(f->nids[idy]);
 			*v = (Vkbasic3dVertex) {
-				.color = {0.5, 0.5, 0.5, 1.0},
+				.color = {0.8f, 0.8f, 0.8f, 1.0f},
 			};
 			memcpy(v->pos, model->vs[vid], 12);
-			v->pos[3] = 1.0;
+			v->pos[3] = 1.0f;
 			memcpy(v->normal, model->ns[nid], 12);
 		}
 	}

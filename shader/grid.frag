@@ -16,25 +16,18 @@ vec4 grid(vec3 pos, float scale, float d) {
 	vec2 grid = abs(fract(coord - 0.5) - 0.5) / derivative;
 	float line = min(grid.x, grid.y);
 	float alpha = 1.0 - min(line, 1.0); // the base wire alpha
-	const float C = 0.01;
-	const float CH = C * 0.01;
-	if ((fract(CH + coord.x * 0.1) < C) ||
-		(fract(CH + coord.y * 0.1) < C)) {
-		alpha *= max(0.0, 1.0 - pow(d, 20));
-	} else {
-		alpha *= max(0.0, 1.0 - pow(d, 5));
-	}
-	vec4 color = vec4(0.5, 0.5, 1.0, alpha);
-	if (coord.x >= 0) {
-		color.x = 0.7;
-	}
-	if (coord.y >= 0) {
-		color.y = 0.7;
-	}
+	alpha *= min(1.0, exp(0.5 * d));
+	vec4 color = vec4(0.5, 0.8, 0.8, alpha);
 	return color;
 }
 
-float depth(vec3 pos) {
+// camera space depth used in drawing
+// viewport depth for correctly handling depth buffer
+float depth_camera(vec3 pos) {
+	vec4 proj = uniforms.view * vec4(pos.xyz, 1.0);
+	return (proj.z / proj.w);
+}
+float depth_viewport(vec3 pos) {
 	vec4 proj = uniforms.proj * uniforms.view * vec4(pos.xyz, 1.0);
 	return (proj.z / proj.w);
 }
@@ -42,7 +35,8 @@ float depth(vec3 pos) {
 void main() {
 	float t = -pc.y / (pf.y - pc.y);
 	vec3 unproj = pc + t * (pf - pc);
-	float d = depth(unproj);
-	gl_FragDepth = d;
+	float d = depth_camera(unproj);
+	float dv = depth_viewport(unproj);
+	gl_FragDepth = dv;
 	o_color = grid(unproj, 10.0, d) * float(t > 0);
 }

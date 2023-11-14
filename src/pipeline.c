@@ -1,15 +1,17 @@
 #include <assert.h>
+#include <libgen.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vulkan/vulkan.h>
-#include <libgen.h>
 
-#include "../include/pipeline.h"
-#include "../include/camera.h"
-#include "../include/vkbasic3d.h"
+#include "../../ppath/include/ppath.h"
 #include "../../vkhelper/include/pipeline.h"
 #include "../../vkhelper/include/shader.h"
-#include "../../ppath/include/ppath.h"
+#include "../include/camera.h"
+#include "../include/pipeline.h"
+#include "../include/vertex.h"
+#include "../include/vkbasic3d.h"
 
 void vkbasic3d_pipeline_new(
 	Vkbasic3d* vb3,
@@ -52,7 +54,7 @@ void vkbasic3d_pipeline_new(
 	vkhelper_pipeline_configure(&conf, vert, frag, width, height);
 	vb3->vib = (VkVertexInputBindingDescription) {
 		.binding = 0,
-		.stride = 56,
+		.stride = sizeof(Vkbasic3dVertex),
 		.inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
 	};
 
@@ -60,31 +62,31 @@ void vkbasic3d_pipeline_new(
 		.binding = 0,
 		.location = 0,
 		.format = VK_FORMAT_R32G32B32A32_SFLOAT,
-		.offset = 0,
+		.offset = offsetof(Vkbasic3dVertex, pos),
 	};
 	vb3->via[1] = (VkVertexInputAttributeDescription) {
 		.binding = 0,
 		.location = 1,
 		.format = VK_FORMAT_R32G32B32A32_SFLOAT,
-		.offset = 16,
+		.offset = offsetof(Vkbasic3dVertex, color),
 	};
 	vb3->via[2] = (VkVertexInputAttributeDescription) {
 		.binding = 0,
 		.location = 2,
 		.format = VK_FORMAT_R32G32B32_SFLOAT,
-		.offset = 32,
+		.offset = offsetof(Vkbasic3dVertex, normal),
 	};
 	vb3->via[3] = (VkVertexInputAttributeDescription) {
 		.binding = 0,
 		.location = 3,
 		.format = VK_FORMAT_R32_SINT,
-		.offset = 44,
+		.offset = offsetof(Vkbasic3dVertex, layer),
 	};
 	vb3->via[4] = (VkVertexInputAttributeDescription) {
 		.binding = 0,
 		.location = 4,
 		.format = VK_FORMAT_R32G32_SFLOAT,
-		.offset = 48,
+		.offset = offsetof(Vkbasic3dVertex, uv),
 	};
 	conf.vis.vertexBindingDescriptionCount = 1;
 	conf.vis.pVertexBindingDescriptions = &vb3->vib;

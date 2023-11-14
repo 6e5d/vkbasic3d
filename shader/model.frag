@@ -19,14 +19,14 @@ void main() {
 	// both need to be normalized
 	float diff = dot(f_norm, uniforms.direction);
 	// B: give some diffusion even at back side
-	const float B = 0.2;
+	const float B = 0.3;
 	if (diff < 0) {
 		diff = B * (diff + 1.0);
 	} else {
 		diff = (1 - B) * diff + B;
 	}
 	vec3 light_color = vec3(1.0, 1.0, 1.0);
-	vec3 color = (0.8 * diff + 0.2) * light_color;
+	vec3 color = (0.6 * diff + 0.4) * light_color;
 
 	// if (f_tex_layer >= 0) {
 	// 	o_color = texture(nonuniformEXT(tex[f_tex_layer]), f_tex_coord); } else {

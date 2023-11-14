@@ -1,13 +1,13 @@
 #ifndef INCLUDEGUARD_VKBASIC3D_VKBASIC3DH
 #define INCLUDEGUARD_VKBASIC3D_VKBASIC3DH
 
-#include <vulkan/vulkan.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <vulkan/vulkan.h>
 
-#include "../include/camera.h"
 #include "../../vkbasic/include/vkbasic.h"
 #include "../../vkhelper/include/buffer.h"
+#include "../include/camera.h"
 
 static const size_t VKBASIC3D_MAX_VERTEX = 100000;
 
@@ -36,7 +36,7 @@ void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device);
 
 void vkbasic3d_build_command(
 	Vkbasic3d* vb3,
-	VkDevice device,
+	Vkstatic* vks,
 	VkCommandBuffer commandbuffer,
 	VkFramebuffer framebuffer,
 	uint32_t width,
