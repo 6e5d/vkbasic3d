@@ -20,10 +20,53 @@ void vkbasic3d_init(
 ) {
 	vb3->zero = 0;
 	vb3->recreate_pipeline = true;
-	vb3->renderpass = vkhelper_renderpass(
+	VkhelperRenderpassConf renderpass_conf;
+
+	vkhelper_renderpass_config(
+		&renderpass_conf,
 		vks->device,
 		vks->surface_format.format,
 		vks->depth_format
+	);
+
+	VkAttachmentReference inputs[2] = {{
+		.attachment = 0,
+		.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+	}, {
+		.attachment = 1,
+		.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+	}};
+
+	VkSubpassDescription subpass[2] = {{
+		.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+		.colorAttachmentCount = 1,
+		.pColorAttachments = &renderpass_conf.color_ref,
+		.pDepthStencilAttachment = &renderpass_conf.depth_ref,
+	}, {
+		.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+		.inputAttachmentCount = 2,
+		.pInputAttachments = inputs,
+		.colorAttachmentCount = 1,
+		.pColorAttachments = &renderpass_conf.color_ref,
+		.pDepthStencilAttachment = &renderpass_conf.depth_ref,
+	}};
+	VkSubpassDependency dependency = {
+		.srcSubpass = 0,
+		.dstSubpass = 1,
+		.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT,
+		.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+	};
+	renderpass_conf.info.subpassCount = 2;
+	renderpass_conf.info.pSubpasses = subpass;
+	renderpass_conf.info.dependencyCount = 1;
+	renderpass_conf.info.pDependencies = &dependency;
+	vkhelper_renderpass_build(
+		&vb3->renderpass,
+		&renderpass_conf,
+		vks->device
 	);
 	// descset layout
 	VkDescriptorSetLayoutBinding setbinding = {
