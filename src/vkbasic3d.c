@@ -29,40 +29,14 @@ void vkbasic3d_init(
 		vks->depth_format
 	);
 
-	VkAttachmentReference inputs[2] = {{
-		.attachment = 0,
-		.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-	}, {
-		.attachment = 1,
-		.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-	}};
-
-	VkSubpassDescription subpass[2] = {{
+	VkSubpassDescription subpass = {
 		.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
 		.colorAttachmentCount = 1,
 		.pColorAttachments = &renderpass_conf.color_ref,
 		.pDepthStencilAttachment = &renderpass_conf.depth_ref,
-	}, {
-		.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-		.inputAttachmentCount = 2,
-		.pInputAttachments = inputs,
-		.colorAttachmentCount = 1,
-		.pColorAttachments = &renderpass_conf.color_ref,
-		.pDepthStencilAttachment = &renderpass_conf.depth_ref,
-	}};
-	VkSubpassDependency dependency = {
-		.srcSubpass = 0,
-		.dstSubpass = 1,
-		.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-		.dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT,
-		.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
 	};
-	renderpass_conf.info.subpassCount = 2;
-	renderpass_conf.info.pSubpasses = subpass;
-	renderpass_conf.info.dependencyCount = 1;
-	renderpass_conf.info.pDependencies = &dependency;
+	renderpass_conf.info.subpassCount = 1;
+	renderpass_conf.info.pSubpasses = &subpass;
 	vkhelper_renderpass_build(
 		&vb3->renderpass,
 		&renderpass_conf,
@@ -85,18 +59,22 @@ void vkbasic3d_init(
 	};
 	assert(0 == vkCreateDescriptorSetLayout(
 		vks->device, &info, NULL, &vb3->descset_layout));
-	vkhelper_buffer_init(
-		&vb3->vbuf, sizeof(Vkbasic3dVertex) * VKBASIC3D_MAX_VERTEX,
+	vkhelper_buffer_init_cpu(
+		&vb3->vbufc, sizeof(Vkbasic3dVertex) * VKBASIC3D_MAX_VERTEX,
+		vks->device, vks->memprop);
+	vkhelper_buffer_init_gpu(
+		&vb3->vbufg, sizeof(Vkbasic3dVertex) * VKBASIC3D_MAX_VERTEX,
 		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 		vks->device, vks->memprop);
-	vkhelper_buffer_init(
-		&vb3->ubuf, sizeof(Vkbasic3dCamera),
+	vkhelper_buffer_init_cpu(
+		&vb3->ubufc, sizeof(Vkbasic3dCamera),
+		vks->device, vks->memprop);
+	vkhelper_buffer_init_gpu(
+		&vb3->ubufg, sizeof(Vkbasic3dCamera),
 		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		vks->device, vks->memprop);
-	assert(0 == vkMapMemory(vks->device, vb3->ubuf.smemory, 0,
-		vb3->ubuf.ssize, 0, (void**)&vb3->camera));
-	vkhelper_buffer_sync(&vb3->ubuf, sizeof(Vkbasic3dCamera),
-		vks->device, vks->queue, vks->cpool);
+	assert(0 == vkMapMemory(vks->device, vb3->ubufc.memory, 0,
+		vb3->ubufc.size, 0, (void**)&vb3->camera));
 	VkDescriptorPoolSize poolsize = {
 		.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 		.descriptorCount = 1,
@@ -118,7 +96,7 @@ void vkbasic3d_init(
 	assert(0 == vkAllocateDescriptorSets(
 		vks->device, &allocinfo, &vb3->descset));
 	VkDescriptorBufferInfo bufferinfo = {
-		.buffer = vb3->ubuf.buffer,
+		.buffer = vb3->ubufg.buffer,
 		.offset = 0,
 		.range = sizeof(Vkbasic3dCamera),
 	};
@@ -139,8 +117,10 @@ void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
 	vkDestroyRenderPass(device, vb3->renderpass, NULL);
 	vkDestroyDescriptorSetLayout(device, vb3->descset_layout, NULL);
 	vkDestroyDescriptorPool(device, vb3->descpool, NULL);
-	vkhelper_buffer_deinit(&vb3->ubuf, device);
-	vkhelper_buffer_deinit(&vb3->vbuf, device);
+	vkhelper_buffer_deinit(&vb3->ubufc, device);
+	vkhelper_buffer_deinit(&vb3->ubufg, device);
+	vkhelper_buffer_deinit(&vb3->vbufc, device);
+	vkhelper_buffer_deinit(&vb3->vbufg, device);
 }
 
 void vkbasic3d_build_command(
@@ -166,13 +146,13 @@ void vkbasic3d_build_command(
 		assert(0 == vkBeginCommandBuffer(commandbuffer, &info));
 	}
 	VkBufferCopy copy = { .size = sizeof(Vkbasic3dCamera) };
-	vkCmdCopyBuffer(commandbuffer, vb3->ubuf.sbuffer, vb3->ubuf.buffer,
+	vkCmdCopyBuffer(commandbuffer, vb3->ubufc.buffer, vb3->ubufg.buffer,
 		1, &copy);
 	if (vb3->vertex_update) {
 		// printf("vertex update\n");
 		copy.size = vb3->vlen * sizeof(Vkbasic3dVertex);
 		vkCmdCopyBuffer(commandbuffer,
-			vb3->vbuf.sbuffer, vb3->vbuf.buffer, 1, &copy);
+			vb3->vbufc.buffer, vb3->vbufg.buffer, 1, &copy);
 		vb3->vertex_update = false;
 	}
 	static const VkClearValue clear_color = {
@@ -217,9 +197,8 @@ void vkbasic3d_build_command(
 		0, NULL
 	);
 	vkCmdBindVertexBuffers(commandbuffer, 0, 1,
-		&vb3->vbuf.buffer, &vb3->zero);
+		&vb3->vbufg.buffer, &vb3->zero);
 	vkCmdDraw(commandbuffer, vb3->vlen, 1, 0, 0);
-	vkCmdNextSubpass(commandbuffer, VK_SUBPASS_CONTENTS_INLINE);
 	vkCmdBindPipeline(
 		commandbuffer,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,

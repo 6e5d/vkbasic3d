@@ -17,8 +17,10 @@ typedef struct {
 	VkPipelineLayout pipelinelayout;
 	VkPipeline pipelineg;
 	VkPipelineLayout pipelineglayout;
-	VkhelperBuffer vbuf;
-	VkhelperBuffer ubuf;
+	VkhelperBuffer vbufc;
+	VkhelperBuffer ubufc;
+	VkhelperBuffer vbufg;
+	VkhelperBuffer ubufg;
 	VkVertexInputBindingDescription vib;
 	VkVertexInputAttributeDescription via[5];
 	VkDeviceSize zero;

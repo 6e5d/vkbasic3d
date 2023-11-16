@@ -39,7 +39,7 @@ void vkbasic3d_pipeline_new(
 		&conf,
 		vb3->renderpass,
 		device,
-		1
+		0
 	);
 	vkDestroyShaderModule(device, frag, NULL);
 	vkDestroyShaderModule(device, vert, NULL);
