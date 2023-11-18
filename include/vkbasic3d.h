@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <vulkan/vulkan.h>
 
-#include "../../vkbasic/include/vkbasic.h"
+#include "../../vkstatic/include/vkstatic.h"
 #include "../../vkhelper/include/buffer.h"
 #include "../include/camera.h"
 
