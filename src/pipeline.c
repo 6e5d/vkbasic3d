@@ -32,7 +32,7 @@ void vkbasic3d_pipeline_new(
 	free(path);
 	vkhelper_pipeline_configure(&conf, vert, frag, width, height);
 	conf.pl.setLayoutCount = 1;
-	conf.pl.pSetLayouts = &vb3->descset_layout;
+	conf.pl.pSetLayouts = &vb3->uniform.layout;
 	vkhelper_pipeline_standard(
 		&vb3->pipelineg,
 		&vb3->pipelineglayout,
@@ -52,48 +52,44 @@ void vkbasic3d_pipeline_new(
 	frag = vkhelper_shader_module(device, path);
 	free(path);
 	vkhelper_pipeline_configure(&conf, vert, frag, width, height);
-	vb3->vib = (VkVertexInputBindingDescription) {
+	VkVertexInputBindingDescription vib = {
 		.binding = 0,
 		.stride = sizeof(Vkbasic3dVertex),
 		.inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
 	};
 
-	vb3->via[0] = (VkVertexInputAttributeDescription) {
+	VkVertexInputAttributeDescription via[5] = {{
 		.binding = 0,
 		.location = 0,
 		.format = VK_FORMAT_R32G32B32A32_SFLOAT,
 		.offset = offsetof(Vkbasic3dVertex, pos),
-	};
-	vb3->via[1] = (VkVertexInputAttributeDescription) {
+	}, {
 		.binding = 0,
 		.location = 1,
 		.format = VK_FORMAT_R32G32B32A32_SFLOAT,
 		.offset = offsetof(Vkbasic3dVertex, color),
-	};
-	vb3->via[2] = (VkVertexInputAttributeDescription) {
+	}, {
 		.binding = 0,
 		.location = 2,
 		.format = VK_FORMAT_R32G32B32_SFLOAT,
 		.offset = offsetof(Vkbasic3dVertex, normal),
-	};
-	vb3->via[3] = (VkVertexInputAttributeDescription) {
+	}, {
 		.binding = 0,
 		.location = 3,
 		.format = VK_FORMAT_R32_SINT,
 		.offset = offsetof(Vkbasic3dVertex, layer),
-	};
-	vb3->via[4] = (VkVertexInputAttributeDescription) {
+	}, {
 		.binding = 0,
 		.location = 4,
 		.format = VK_FORMAT_R32G32_SFLOAT,
 		.offset = offsetof(Vkbasic3dVertex, uv),
-	};
+	}};
 	conf.vis.vertexBindingDescriptionCount = 1;
-	conf.vis.pVertexBindingDescriptions = &vb3->vib;
+	conf.vis.pVertexBindingDescriptions = &vib;
 	conf.vis.vertexAttributeDescriptionCount = 5;
-	conf.vis.pVertexAttributeDescriptions = vb3->via;
+	conf.vis.pVertexAttributeDescriptions = via;
 	conf.pl.setLayoutCount = 1;
-	conf.pl.pSetLayouts = &vb3->descset_layout;
+	conf.pl.pSetLayouts = &vb3->uniform.layout;
 	vkhelper_pipeline_standard(
 		&vb3->pipeline,
 		&vb3->pipelinelayout,

@@ -5,8 +5,9 @@
 #include <stdint.h>
 #include <vulkan/vulkan.h>
 
-#include "../../vkstatic/include/vkstatic.h"
+#include "../../vkhelper/include/desc.h"
 #include "../../vkhelper/include/buffer.h"
+#include "../../vkstatic/include/vkstatic.h"
 #include "../include/camera.h"
 
 static const size_t VKBASIC3D_MAX_VERTEX = 100000;
@@ -18,19 +19,14 @@ typedef struct {
 	VkPipeline pipelineg;
 	VkPipelineLayout pipelineglayout;
 	VkhelperBuffer vbufc;
-	VkhelperBuffer ubufc;
 	VkhelperBuffer vbufg;
-	VkhelperBuffer ubufg;
-	VkVertexInputBindingDescription vib;
-	VkVertexInputAttributeDescription via[5];
-	VkDeviceSize zero;
 	uint32_t vlen;
 	bool vertex_update;
 	bool recreate_pipeline;
-	Vkbasic3dCamera* camera; // mapped
-	VkDescriptorPool descpool;
-	VkDescriptorSetLayout descset_layout;
-	VkDescriptorSet descset;
+	VkhelperDesc uniform;
+	VkhelperBuffer ubufg;
+	VkhelperBuffer ubufc;
+	Vkbasic3dCamera* camera; // mapped, no free
 } Vkbasic3d;
 
 void vkbasic3d_init(Vkbasic3d* vb3, Vkstatic* vks);

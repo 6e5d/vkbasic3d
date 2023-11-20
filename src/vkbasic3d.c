@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 
 #include "../../vkhelper/include/buffer.h"
+#include "../../vkhelper/include/desc.h"
 #include "../../vkhelper/include/renderpass.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../include/camera.h"
@@ -18,7 +19,6 @@ void vkbasic3d_init(
 	Vkbasic3d* vb3,
 	Vkstatic* vks
 ) {
-	vb3->zero = 0;
 	vb3->recreate_pipeline = true;
 	VkhelperRenderpassConf renderpass_conf;
 
@@ -42,23 +42,6 @@ void vkbasic3d_init(
 		&renderpass_conf,
 		vks->device
 	);
-	// descset layout
-	VkDescriptorSetLayoutBinding setbinding = {
-		.binding = 0,
-		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		.descriptorCount = 1,
-		.stageFlags = VK_SHADER_STAGE_VERTEX_BIT |
-			VK_SHADER_STAGE_FRAGMENT_BIT,
-	};
-	VkDescriptorSetLayoutCreateInfo info = {
-		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-		.pNext = NULL,
-		.flags = 0,
-		.bindingCount = 1,
-		.pBindings = &setbinding,
-	};
-	assert(0 == vkCreateDescriptorSetLayout(
-		vks->device, &info, NULL, &vb3->descset_layout));
 	vkhelper_buffer_init_cpu(
 		&vb3->vbufc, sizeof(Vkbasic3dVertex) * VKBASIC3D_MAX_VERTEX,
 		vks->device, vks->memprop);
@@ -75,26 +58,9 @@ void vkbasic3d_init(
 		vks->device, vks->memprop);
 	assert(0 == vkMapMemory(vks->device, vb3->ubufc.memory, 0,
 		vb3->ubufc.size, 0, (void**)&vb3->camera));
-	VkDescriptorPoolSize poolsize = {
-		.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		.descriptorCount = 1,
-	};
-	VkDescriptorPoolCreateInfo poolinfo = {
-		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-		.poolSizeCount = 1,
-		.pPoolSizes = &poolsize,
-		.maxSets = 1,
-	};
-	assert(0 == vkCreateDescriptorPool(
-		vks->device, &poolinfo, NULL, &vb3->descpool));
-	VkDescriptorSetAllocateInfo allocinfo = {
-		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-		.descriptorPool = vb3->descpool,
-		.descriptorSetCount = 1,
-		.pSetLayouts = &vb3->descset_layout,
-	};
-	assert(0 == vkAllocateDescriptorSets(
-		vks->device, &allocinfo, &vb3->descset));
+	VkhelperDescConf conf;
+	vkhelper_desc_config(&conf);
+	vkhelper_desc_build(&vb3->uniform, &conf, vks->device);
 	VkDescriptorBufferInfo bufferinfo = {
 		.buffer = vb3->ubufg.buffer,
 		.offset = 0,
@@ -102,7 +68,7 @@ void vkbasic3d_init(
 	};
 	VkWriteDescriptorSet descwrite = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.dstSet = vb3->descset,
+		.dstSet = vb3->uniform.set,
 		.dstBinding = 0,
 		.dstArrayElement = 0,
 		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -115,8 +81,7 @@ void vkbasic3d_init(
 void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
 	vkbasic3d_pipeline_destroy(vb3, device);
 	vkDestroyRenderPass(device, vb3->renderpass, NULL);
-	vkDestroyDescriptorSetLayout(device, vb3->descset_layout, NULL);
-	vkDestroyDescriptorPool(device, vb3->descpool, NULL);
+	vkhelper_desc_deinit(&vb3->uniform, device);
 	vkhelper_buffer_deinit(&vb3->ubufc, device);
 	vkhelper_buffer_deinit(&vb3->ubufg, device);
 	vkhelper_buffer_deinit(&vb3->vbufc, device);
@@ -193,11 +158,12 @@ void vkbasic3d_build_command(
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
 		vb3->pipelinelayout,
 		0, 1,
-		&vb3->descset,
+		&vb3->uniform.set,
 		0, NULL
 	);
+	VkDeviceSize zero = 0;
 	vkCmdBindVertexBuffers(commandbuffer, 0, 1,
-		&vb3->vbufg.buffer, &vb3->zero);
+		&vb3->vbufg.buffer, &zero);
 	vkCmdDraw(commandbuffer, vb3->vlen, 1, 0, 0);
 	vkCmdBindPipeline(
 		commandbuffer,
@@ -209,7 +175,7 @@ void vkbasic3d_build_command(
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
 		vb3->pipelinelayout,
 		0, 1,
-		&vb3->descset,
+		&vb3->uniform.set,
 		0, NULL
 	);
 	vkCmdDraw(commandbuffer, 6, 1, 0, 0);
