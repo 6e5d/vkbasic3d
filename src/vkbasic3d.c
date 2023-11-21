@@ -19,7 +19,6 @@ void vkbasic3d_init(
 	Vkbasic3d* vb3,
 	Vkstatic* vks
 ) {
-	vb3->recreate_pipeline = true;
 	VkhelperRenderpassConf renderpass_conf;
 
 	vkhelper_renderpass_config(
@@ -59,7 +58,7 @@ void vkbasic3d_init(
 	assert(0 == vkMapMemory(vks->device, vb3->ubufc.memory, 0,
 		vb3->ubufc.size, 0, (void**)&vb3->camera));
 	VkhelperDescConf conf;
-	vkhelper_desc_config(&conf);
+	vkhelper_desc_config(&conf, 1);
 	vkhelper_desc_build(&vb3->uniform, &conf, vks->device);
 	VkDescriptorBufferInfo bufferinfo = {
 		.buffer = vb3->ubufg.buffer,
@@ -76,10 +75,14 @@ void vkbasic3d_init(
 		.pBufferInfo = &bufferinfo,
 	};
 	vkUpdateDescriptorSets(vks->device, 1, &descwrite, 0, NULL);
+	vkbasic3d_pipeline_init(vb3, vks->device);
 }
 
 void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
-	vkbasic3d_pipeline_destroy(vb3, device);
+	vkDestroyPipeline(device, vb3->ppl_model, NULL);
+	vkDestroyPipelineLayout(device, vb3->ppll_model, NULL);
+	vkDestroyPipeline(device, vb3->ppl_grid, NULL);
+	vkDestroyPipelineLayout(device, vb3->ppll_grid, NULL);
 	vkDestroyRenderPass(device, vb3->renderpass, NULL);
 	vkhelper_desc_deinit(&vb3->uniform, device);
 	vkhelper_buffer_deinit(&vb3->ubufc, device);
@@ -91,32 +94,25 @@ void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
 void vkbasic3d_build_command(
 	Vkbasic3d* vb3,
 	Vkstatic* vks,
-	VkCommandBuffer commandbuffer,
+	VkCommandBuffer cbuf,
 	VkFramebuffer framebuffer,
 	uint32_t width,
 	uint32_t height
 ) {
-	if (vb3->recreate_pipeline) {
-		if (vb3->pipeline != VK_NULL_HANDLE) {
-			vkbasic3d_pipeline_destroy(vb3, vks->device);
-		}
-		vkbasic3d_pipeline_new(vb3, vks->device, width, height);
-		vb3->recreate_pipeline = false;
-	}
 	{
 		VkCommandBufferBeginInfo info = {
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
 			.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
 		};
-		assert(0 == vkBeginCommandBuffer(commandbuffer, &info));
+		assert(0 == vkBeginCommandBuffer(cbuf, &info));
 	}
 	VkBufferCopy copy = { .size = sizeof(Vkbasic3dCamera) };
-	vkCmdCopyBuffer(commandbuffer, vb3->ubufc.buffer, vb3->ubufg.buffer,
+	vkCmdCopyBuffer(cbuf, vb3->ubufc.buffer, vb3->ubufg.buffer,
 		1, &copy);
 	if (vb3->vertex_update) {
 		// printf("vertex update\n");
 		copy.size = vb3->vlen * sizeof(Vkbasic3dVertex);
-		vkCmdCopyBuffer(commandbuffer,
+		vkCmdCopyBuffer(cbuf,
 			vb3->vbufc.buffer, vb3->vbufg.buffer, 1, &copy);
 		vb3->vertex_update = false;
 	}
@@ -128,6 +124,13 @@ void vkbasic3d_build_command(
 		.depthStencil.stencil = 0,
 	};
 	VkClearValue clear_values[2] = {clear_color, clear_depthstencil};
+
+	VkViewport viewport = {0.0f, 0.0f,
+		(float)width, (float)height,
+		0.0f, 1.0f};
+	VkRect2D scissor = {{0.0f, 0.0f}, {width, height}};
+	vkCmdSetViewport(cbuf, 0, 1, &viewport);
+	vkCmdSetScissor(cbuf, 0, 1, &scissor);
 
 	{
 		VkRenderPassBeginInfo info = {
@@ -142,43 +145,39 @@ void vkbasic3d_build_command(
 			.pClearValues = clear_values,
 		};
 		vkCmdBeginRenderPass(
-			commandbuffer,
+			cbuf,
 			&info,
 			VK_SUBPASS_CONTENTS_INLINE
 		);
 	}
 
 	vkCmdBindPipeline(
-		commandbuffer,
+		cbuf,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		vb3->pipeline
-	);
+		vb3->ppl_model);
 	vkCmdBindDescriptorSets(
-		commandbuffer,
+		cbuf,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		vb3->pipelinelayout,
+		vb3->ppll_model,
 		0, 1,
 		&vb3->uniform.set,
-		0, NULL
-	);
+		0, NULL);
 	VkDeviceSize zero = 0;
-	vkCmdBindVertexBuffers(commandbuffer, 0, 1,
+	vkCmdBindVertexBuffers(cbuf, 0, 1,
 		&vb3->vbufg.buffer, &zero);
-	vkCmdDraw(commandbuffer, vb3->vlen, 1, 0, 0);
+	vkCmdDraw(cbuf, vb3->vlen, 1, 0, 0);
 	vkCmdBindPipeline(
-		commandbuffer,
+		cbuf,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		vb3->pipelineg
-	);
+		vb3->ppl_grid);
 	vkCmdBindDescriptorSets(
-		commandbuffer,
+		cbuf,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		vb3->pipelinelayout,
+		vb3->ppll_grid,
 		0, 1,
 		&vb3->uniform.set,
-		0, NULL
-	);
-	vkCmdDraw(commandbuffer, 6, 1, 0, 0);
-	vkCmdEndRenderPass(commandbuffer);
+		0, NULL);
+	vkCmdDraw(cbuf, 6, 1, 0, 0);
+	vkCmdEndRenderPass(cbuf);
 	assert(0 == vkEndCommandBuffer(vks->cbuf));
 }

@@ -5,8 +5,9 @@
 #include <stdint.h>
 #include <vulkan/vulkan.h>
 
-#include "../../vkhelper/include/desc.h"
 #include "../../vkhelper/include/buffer.h"
+#include "../../vkhelper/include/desc.h"
+#include "../../vkhelper/include/pipeline.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../include/camera.h"
 
@@ -14,15 +15,14 @@ static const size_t VKBASIC3D_MAX_VERTEX = 100000;
 
 typedef struct {
 	VkRenderPass renderpass;
-	VkPipeline pipeline;
-	VkPipelineLayout pipelinelayout;
-	VkPipeline pipelineg;
-	VkPipelineLayout pipelineglayout;
+	VkPipeline ppl_model;
+	VkPipelineLayout ppll_model;
+	VkPipeline ppl_grid;
+	VkPipelineLayout ppll_grid;
 	VkhelperBuffer vbufc;
 	VkhelperBuffer vbufg;
 	uint32_t vlen;
 	bool vertex_update;
-	bool recreate_pipeline;
 	VkhelperDesc uniform;
 	VkhelperBuffer ubufg;
 	VkhelperBuffer ubufc;
