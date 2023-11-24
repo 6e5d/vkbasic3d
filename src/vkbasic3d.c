@@ -19,7 +19,7 @@ void vkbasic3d_init(
 	Vkbasic3d* vb3,
 	Vkstatic* vks
 ) {
-	VkhelperRenderpassConf renderpass_conf;
+	VkhelperRenderpassConfig renderpass_conf;
 
 	vkhelper_renderpass_config(
 		&renderpass_conf,
@@ -57,9 +57,10 @@ void vkbasic3d_init(
 		vks->device, vks->memprop);
 	assert(0 == vkMapMemory(vks->device, vb3->ubufc.memory, 0,
 		vb3->ubufc.size, 0, (void**)&vb3->camera));
-	VkhelperDescConf conf;
+	VkhelperDescConfig conf;
 	vkhelper_desc_config(&conf, 1);
 	vkhelper_desc_build(&vb3->uniform, &conf, vks->device);
+	vkhelper_desc_config_deinit(&conf);
 	VkDescriptorBufferInfo bufferinfo = {
 		.buffer = vb3->ubufg.buffer,
 		.offset = 0,

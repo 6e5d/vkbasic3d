@@ -18,11 +18,11 @@ static void vkbasic3d_pipeline_init_grid(Vkbasic3d *vb3, VkDevice device) {
 	VkhelperPipelineConfig vpc = {0};
 	vkhelper_pipeline_config(&vpc, 0, 0, 1);
 
-	path = ppath_rel_new(__FILE__, "../../shader/grid_vert.spv");
+	path = ppath_rel(__FILE__, "../../shader/grid_vert.spv");
 	vpc.stages[0].module = vkhelper_shader_module(device, path);
 	free(path);
 
-	path = ppath_rel_new(__FILE__, "../../shader/grid_frag.spv");
+	path = ppath_rel(__FILE__, "../../shader/grid_frag.spv");
 	vpc.stages[1].module = vkhelper_shader_module(device, path);
 	free(path);
 
@@ -37,11 +37,11 @@ static void vkbasic3d_pipeline_init_model(Vkbasic3d *vb3, VkDevice device) {
 	VkhelperPipelineConfig vpc = {0};
 	vkhelper_pipeline_config(&vpc, 1, 5, 1);
 
-	path = ppath_rel_new(__FILE__, "../../shader/model_vert.spv");
+	path = ppath_rel(__FILE__, "../../shader/model_vert.spv");
 	vpc.stages[0].module = vkhelper_shader_module(device, path);
 	free(path);
 
-	path = ppath_rel_new(__FILE__, "../../shader/model_frag.spv");
+	path = ppath_rel(__FILE__, "../../shader/model_frag.spv");
 	vpc.stages[1].module = vkhelper_shader_module(device, path);
 	free(path);
 
