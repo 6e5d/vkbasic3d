@@ -7,6 +7,7 @@
 
 #include "../../vkhelper/include/buffer.h"
 #include "../../vkhelper/include/desc.h"
+#include "../../vkhelper/include/dynstate.h"
 #include "../../vkhelper/include/renderpass.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../include/camera.h"
@@ -36,6 +37,8 @@ void vkbasic3d_init(
 	};
 	renderpass_conf.info.subpassCount = 1;
 	renderpass_conf.info.pSubpasses = &subpass;
+	renderpass_conf.descs[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	renderpass_conf.descs[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	vkhelper_renderpass_build(
 		&vb3->renderpass,
 		&renderpass_conf,
@@ -126,12 +129,7 @@ void vkbasic3d_build_command(
 	};
 	VkClearValue clear_values[2] = {clear_color, clear_depthstencil};
 
-	VkViewport viewport = {0.0f, 0.0f,
-		(float)width, (float)height,
-		0.0f, 1.0f};
-	VkRect2D scissor = {{0.0f, 0.0f}, {width, height}};
-	vkCmdSetViewport(cbuf, 0, 1, &viewport);
-	vkCmdSetScissor(cbuf, 0, 1, &scissor);
+	vkhelper_viewport_scissor(cbuf, width, height);
 
 	{
 		VkRenderPassBeginInfo info = {
@@ -164,8 +162,7 @@ void vkbasic3d_build_command(
 		&vb3->uniform.set,
 		0, NULL);
 	VkDeviceSize zero = 0;
-	vkCmdBindVertexBuffers(cbuf, 0, 1,
-		&vb3->vbufg.buffer, &zero);
+	vkCmdBindVertexBuffers(cbuf, 0, 1, &vb3->vbufg.buffer, &zero);
 	vkCmdDraw(cbuf, vb3->vlen, 1, 0, 0);
 	vkCmdBindPipeline(
 		cbuf,
