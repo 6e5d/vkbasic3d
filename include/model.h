@@ -1,5 +1,5 @@
-#ifndef INCLUDEGUARD_VKBASIC3D_MODEL
-#define INCLUDEGUARD_VKBASIC3D_MODEL
+#ifndef INCLUDEGUARD_VKBASIC3D_MODELH
+#define INCLUDEGUARD_VKBASIC3D_MODELH
 
 #include "../../vkstatic/include/vkstatic.h"
 #include "../../modelobj/include/modelobj.h"
