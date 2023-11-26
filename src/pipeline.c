@@ -6,7 +6,6 @@
 #include <vulkan/vulkan.h>
 
 #include "../../vkhelper/include/pipeline.h"
-#include "../../vkhelper/include/shader.h"
 #include "../include/camera.h"
 #include "../include/pipeline.h"
 #include "../include/vertex.h"
