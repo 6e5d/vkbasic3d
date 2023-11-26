@@ -5,7 +5,6 @@
 #include <string.h>
 #include <vulkan/vulkan.h>
 
-#include "../../ppath/include/ppath.h"
 #include "../../vkhelper/include/pipeline.h"
 #include "../../vkhelper/include/shader.h"
 #include "../include/camera.h"
@@ -14,16 +13,10 @@
 #include "../include/vkbasic3d.h"
 
 static void vkbasic3d_pipeline_init_grid(Vkbasic3d *vb3, VkDevice device) {
-	char* path = NULL;
 	VkhelperPipelineConfig vpc = {0};
 	vkhelper_pipeline_config(&vpc, 0, 0, 1);
-
-	ppath_rel(&path, __FILE__, "../../shader/grid_vert.spv");
-	vpc.stages[0].module = vkhelper_shader_module(device, path);
-	ppath_rel(&path, __FILE__, "../../shader/grid_frag.spv");
-	vpc.stages[1].module = vkhelper_shader_module(device, path);
-	free(path);
-
+	vkhelper_pipeline_simple_shader(&vpc, device,
+		__FILE__, "../../shader/grid");
 	vpc.desc[0] = vb3->uniform.layout;
 	vkhelper_pipeline_build(&vb3->ppll_grid, &vb3->ppl_grid,
 		&vpc, vb3->renderpass, device, 0);
@@ -31,16 +24,10 @@ static void vkbasic3d_pipeline_init_grid(Vkbasic3d *vb3, VkDevice device) {
 }
 
 static void vkbasic3d_pipeline_init_model(Vkbasic3d *vb3, VkDevice device) {
-	char* path = NULL;
 	VkhelperPipelineConfig vpc = {0};
 	vkhelper_pipeline_config(&vpc, 1, 5, 1);
-
-	ppath_rel(&path, __FILE__, "../../shader/model_vert.spv");
-	vpc.stages[0].module = vkhelper_shader_module(device, path);
-	ppath_rel(&path, __FILE__, "../../shader/model_frag.spv");
-	vpc.stages[1].module = vkhelper_shader_module(device, path);
-	free(path);
-
+	vkhelper_pipeline_simple_shader(&vpc, device,
+		__FILE__, "../../shader/model");
 	vpc.vib[0] = (VkVertexInputBindingDescription) {
 		.binding = 0,
 		.stride = sizeof(Vkbasic3dVertex),
