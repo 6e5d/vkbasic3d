@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 
 #include "../../modelobj/include/modelobj.h"
-#include "../../vkhelper/include/buffer.h"
+#include "../../vkhelper2/include/vkhelper2.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../include/model.h"
 #include "../include/vertex.h"

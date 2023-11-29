@@ -1,8 +1,6 @@
 #ifndef INCLUDEGUARD_VKBASIC3D_VERTEXH
 #define INCLUDEGUARD_VKBASIC3D_VERTEXH
 
-#include <stdint.h>
-
 typedef struct {
 	float pos[4];
 	float color[4];

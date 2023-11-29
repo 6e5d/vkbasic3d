@@ -1,14 +1,8 @@
-#include <assert.h>
 #include <cglm/cglm.h>
 #include <math.h>
-#include <stddef.h>
-#include <stdlib.h>
 #include <vulkan/vulkan.h>
 
-#include "../../vkhelper/include/buffer.h"
-#include "../../vkhelper/include/desc.h"
-#include "../../vkhelper/include/dynstate.h"
-#include "../../vkhelper/include/renderpass.h"
+#include "../../vkhelper2/include/vkhelper2.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../include/camera.h"
 #include "../include/model.h"
@@ -20,9 +14,9 @@ void vkbasic3d_init(
 	Vkbasic3d* vb3,
 	Vkstatic* vks
 ) {
-	VkhelperRenderpassConfig renderpass_conf;
+	Vkhelper2RenderpassConfig renderpass_conf;
 
-	vkhelper_renderpass_config(
+	vkhelper2_renderpass_config(
 		&renderpass_conf,
 		vks->device,
 		vks->surface_format.format,
@@ -39,31 +33,31 @@ void vkbasic3d_init(
 	renderpass_conf.info.pSubpasses = &subpass;
 	renderpass_conf.descs[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	renderpass_conf.descs[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	vkhelper_renderpass_build(
+	vkhelper2_renderpass_build(
 		&vb3->renderpass,
 		&renderpass_conf,
 		vks->device
 	);
-	vkhelper_buffer_init_cpu(
+	vkhelper2_buffer_init_cpu(
 		&vb3->vbufc, sizeof(Vkbasic3dVertex) * VKBASIC3D_MAX_VERTEX,
 		vks->device, vks->memprop);
-	vkhelper_buffer_init_gpu(
+	vkhelper2_buffer_init_gpu(
 		&vb3->vbufg, sizeof(Vkbasic3dVertex) * VKBASIC3D_MAX_VERTEX,
 		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 		vks->device, vks->memprop);
-	vkhelper_buffer_init_cpu(
+	vkhelper2_buffer_init_cpu(
 		&vb3->ubufc, sizeof(Vkbasic3dCamera),
 		vks->device, vks->memprop);
-	vkhelper_buffer_init_gpu(
+	vkhelper2_buffer_init_gpu(
 		&vb3->ubufg, sizeof(Vkbasic3dCamera),
 		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		vks->device, vks->memprop);
 	assert(0 == vkMapMemory(vks->device, vb3->ubufc.memory, 0,
 		vb3->ubufc.size, 0, (void**)&vb3->camera));
-	VkhelperDescConfig conf;
-	vkhelper_desc_config(&conf, 1);
-	vkhelper_desc_build(&vb3->uniform, &conf, vks->device);
-	vkhelper_desc_config_deinit(&conf);
+	Vkhelper2DescConfig conf;
+	vkhelper2_desc_config(&conf, 1);
+	vkhelper2_desc_build(&vb3->uniform, &conf, vks->device);
+	vkhelper2_desc_config_deinit(&conf);
 	VkDescriptorBufferInfo bufferinfo = {
 		.buffer = vb3->ubufg.buffer,
 		.offset = 0,
@@ -88,11 +82,11 @@ void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device) {
 	vkDestroyPipeline(device, vb3->ppl_grid, NULL);
 	vkDestroyPipelineLayout(device, vb3->ppll_grid, NULL);
 	vkDestroyRenderPass(device, vb3->renderpass, NULL);
-	vkhelper_desc_deinit(&vb3->uniform, device);
-	vkhelper_buffer_deinit(&vb3->ubufc, device);
-	vkhelper_buffer_deinit(&vb3->ubufg, device);
-	vkhelper_buffer_deinit(&vb3->vbufc, device);
-	vkhelper_buffer_deinit(&vb3->vbufg, device);
+	vkhelper2_desc_deinit(&vb3->uniform, device);
+	vkhelper2_buffer_deinit(&vb3->ubufc, device);
+	vkhelper2_buffer_deinit(&vb3->ubufg, device);
+	vkhelper2_buffer_deinit(&vb3->vbufc, device);
+	vkhelper2_buffer_deinit(&vb3->vbufg, device);
 }
 
 void vkbasic3d_build_command(
@@ -112,8 +106,8 @@ void vkbasic3d_build_command(
 			vb3->vbufc.buffer, vb3->vbufg.buffer, 1, &copy);
 		vb3->vertex_update = false;
 	}
-	vkhelper_viewport_scissor(cbuf, width, height);
-	vkhelper_renderpass_begin_clear(cbuf, vb3->renderpass, fb,
+	vkhelper2_dynstate_vs(cbuf, width, height);
+	vkhelper2_renderpass_begin_clear(cbuf, vb3->renderpass, fb,
 		width, height);
 	vkCmdBindPipeline(cbuf, VK_PIPELINE_BIND_POINT_GRAPHICS,
 		vb3->ppl_model);

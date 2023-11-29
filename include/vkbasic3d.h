@@ -1,13 +1,9 @@
 #ifndef INCLUDEGUARD_VKBASIC3D_VKBASIC3DH
 #define INCLUDEGUARD_VKBASIC3D_VKBASIC3DH
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <vulkan/vulkan.h>
 
-#include "../../vkhelper/include/buffer.h"
-#include "../../vkhelper/include/desc.h"
-#include "../../vkhelper/include/pipeline.h"
+#include "../../vkhelper2/include/vkhelper2.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../include/camera.h"
 
@@ -19,13 +15,13 @@ typedef struct {
 	VkPipelineLayout ppll_model;
 	VkPipeline ppl_grid;
 	VkPipelineLayout ppll_grid;
-	VkhelperBuffer vbufc;
-	VkhelperBuffer vbufg;
+	Vkhelper2Buffer vbufc;
+	Vkhelper2Buffer vbufg;
 	uint32_t vlen;
 	bool vertex_update;
-	VkhelperDesc uniform;
-	VkhelperBuffer ubufg;
-	VkhelperBuffer ubufc;
+	Vkhelper2Desc uniform;
+	Vkhelper2Buffer ubufg;
+	Vkhelper2Buffer ubufc;
 	Vkbasic3dCamera* camera; // mapped, no free
 } Vkbasic3d;
 

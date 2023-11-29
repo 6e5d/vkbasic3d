@@ -1,31 +1,26 @@
-#include <assert.h>
-#include <libgen.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
 #include <vulkan/vulkan.h>
 
-#include "../../vkhelper/include/pipeline.h"
+#include "../../vkhelper2/include/vkhelper2.h"
 #include "../include/camera.h"
 #include "../include/pipeline.h"
 #include "../include/vertex.h"
 #include "../include/vkbasic3d.h"
 
 static void vkbasic3d_pipeline_init_grid(Vkbasic3d *vb3, VkDevice device) {
-	VkhelperPipelineConfig vpc = {0};
-	vkhelper_pipeline_config(&vpc, 0, 0, 1);
-	vkhelper_pipeline_simple_shader(&vpc, device,
+	Vkhelper2PipelineConfig vpc = {0};
+	vkhelper2_pipeline_config(&vpc, 0, 0, 1);
+	vkhelper2_pipeline_simple_shader(&vpc, device,
 		__FILE__, "../../shader/grid");
 	vpc.desc[0] = vb3->uniform.layout;
-	vkhelper_pipeline_build(&vb3->ppll_grid, &vb3->ppl_grid,
+	vkhelper2_pipeline_build(&vb3->ppll_grid, &vb3->ppl_grid,
 		&vpc, vb3->renderpass, device, 0);
-	vkhelper_pipeline_config_deinit(&vpc, device);
+	vkhelper2_pipeline_config_deinit(&vpc, device);
 }
 
 static void vkbasic3d_pipeline_init_model(Vkbasic3d *vb3, VkDevice device) {
-	VkhelperPipelineConfig vpc = {0};
-	vkhelper_pipeline_config(&vpc, 1, 5, 1);
-	vkhelper_pipeline_simple_shader(&vpc, device,
+	Vkhelper2PipelineConfig vpc = {0};
+	vkhelper2_pipeline_config(&vpc, 1, 5, 1);
+	vkhelper2_pipeline_simple_shader(&vpc, device,
 		__FILE__, "../../shader/model");
 	vpc.vib[0] = (VkVertexInputBindingDescription) {
 		.binding = 0,
@@ -65,9 +60,9 @@ static void vkbasic3d_pipeline_init_model(Vkbasic3d *vb3, VkDevice device) {
 	};
 
 	vpc.desc[0] = vb3->uniform.layout;
-	vkhelper_pipeline_build(&vb3->ppll_model, &vb3->ppl_model,
+	vkhelper2_pipeline_build(&vb3->ppll_model, &vb3->ppl_model,
 		&vpc, vb3->renderpass, device, 0);
-	vkhelper_pipeline_config_deinit(&vpc, device);
+	vkhelper2_pipeline_config_deinit(&vpc, device);
 }
 
 void vkbasic3d_pipeline_init(Vkbasic3d *vb3, VkDevice device) {
