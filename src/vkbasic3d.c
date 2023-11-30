@@ -17,7 +17,6 @@ void vkbasic3d_init(
 
 	vkhelper2_renderpass_config(
 		&renderpass_conf,
-		vks->device,
 		vks->surface_format.format,
 		vks->depth_format
 	);
