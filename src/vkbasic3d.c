@@ -5,7 +5,6 @@
 #include "../../vkhelper2/include/vkhelper2.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../include/camera.h"
-#include "../include/model.h"
 #include "../include/pipeline.h"
 #include "../include/vertex.h"
 #include "../include/vkbasic3d.h"

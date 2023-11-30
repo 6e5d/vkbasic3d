@@ -1,10 +1,11 @@
-#ifndef INCLUDEGUARD_VKBASIC3D_VKBASIC3DH
-#define INCLUDEGUARD_VKBASIC3D_VKBASIC3DH
+#ifndef INCLUDEGUARD_VKBASIC3D
+#define INCLUDEGUARD_VKBASIC3D
 
 #include <vulkan/vulkan.h>
 
 #include "../../vkhelper2/include/vkhelper2.h"
 #include "../../vkstatic/include/vkstatic.h"
+#include "../../modelobj/include/modelobj.h"
 #include "../include/camera.h"
 
 static const size_t VKBASIC3D_MAX_VERTEX = 100000;
@@ -24,10 +25,8 @@ typedef struct {
 	Vkhelper2Buffer ubufc;
 	Vkbasic3dCamera* camera; // mapped, no free
 } Vkbasic3d;
-
 void vkbasic3d_init(Vkbasic3d* vb3, Vkstatic* vks);
 void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device);
-
 void vkbasic3d_build_command(
 	Vkbasic3d* vb3,
 	Vkstatic* vks,
@@ -35,6 +34,12 @@ void vkbasic3d_build_command(
 	VkFramebuffer framebuffer,
 	uint32_t width,
 	uint32_t height
+);
+
+void vkbasic3d_model_upload(
+	Vkstatic* vs,
+	Vkbasic3d* vb3,
+	Modelobj* model
 );
 
 #endif
