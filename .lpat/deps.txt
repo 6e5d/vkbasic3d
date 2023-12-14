@@ -1,3 +1,4 @@
 vkstatic
 vkhelper2
 modelobj
+vkbasic3d_shader

@@ -10,7 +10,7 @@ static void vkbasic3d_pipeline_init_grid(Vkbasic3d *vb3, VkDevice device) {
 	Vkhelper2PipelineConfig vpc = {0};
 	vkhelper2_pipeline_config(&vpc, 0, 0, 1);
 	vkhelper2_pipeline_simple_shader(&vpc, device,
-		__FILE__, "../../shader/grid");
+		__FILE__, "../../vkbasic3d_shader/build/grid");
 	vpc.desc[0] = vb3->uniform.layout;
 	vkhelper2_pipeline_build(&vb3->ppll_grid, &vb3->ppl_grid,
 		&vpc, vb3->renderpass, device, 0);
@@ -21,7 +21,7 @@ static void vkbasic3d_pipeline_init_model(Vkbasic3d *vb3, VkDevice device) {
 	Vkhelper2PipelineConfig vpc = {0};
 	vkhelper2_pipeline_config(&vpc, 1, 5, 1);
 	vkhelper2_pipeline_simple_shader(&vpc, device,
-		__FILE__, "../../shader/model");
+		__FILE__, "../../vkbasic3d_shader/build/model");
 	vpc.vib[0] = (VkVertexInputBindingDescription) {
 		.binding = 0,
 		.stride = sizeof(Vkbasic3dVertex),
