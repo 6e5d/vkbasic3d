@@ -1,6 +1,6 @@
 #include <vulkan/vulkan.h>
 
-#include "../../modelobj/include/modelobj.h"
+#include "../../modelobj/build/modelobj.h"
 #include "../../vkhelper2/include/vkhelper2.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../include/vertex.h"
@@ -14,14 +14,14 @@ static size_t chk(int32_t v) {
 void vkbasic3d_model_upload(
 	Vkstatic* vs,
 	Vkbasic3d* vb3,
-	Modelobj* model
+	Com_6e5dModelobj* model
 ) {
 	assert(model->v_len <= VKBASIC3D_MAX_VERTEX);
 	Vkbasic3dVertex* target;
 	assert(0 == vkMapMemory(vs->device, vb3->vbufc.memory, 0,
 		vb3->vbufc.size, 0, (void**)&target));
 	for (size_t idx = 0; idx < model->f_len; idx += 1) {
-		ModelobjFace* f = &model->fs[idx];
+		Com_6e5dModelobjFace* f = &model->fs[idx];
 		for (size_t idy = 0; idy < 3; idy += 1) {
 			Vkbasic3dVertex* v = &target[idx * 3 + idy];
 			size_t vid = chk(f->vids[idy]);

@@ -5,7 +5,7 @@
 
 #include "../../vkhelper2/include/vkhelper2.h"
 #include "../../vkstatic/include/vkstatic.h"
-#include "../../modelobj/include/modelobj.h"
+#include "../../modelobj/build/modelobj.h"
 #include "../include/camera.h"
 
 static const size_t VKBASIC3D_MAX_VERTEX = 100000;
@@ -39,7 +39,7 @@ void vkbasic3d_build_command(
 void vkbasic3d_model_upload(
 	Vkstatic* vs,
 	Vkbasic3d* vb3,
-	Modelobj* model
+	Com_6e5dModelobj* model
 );
 
 #endif
