@@ -1,14 +1,27 @@
-#ifndef INCLUDEGUARD_VKBASIC3D
-#define INCLUDEGUARD_VKBASIC3D
-
 #include <vulkan/vulkan.h>
+#include <cglm/cglm.h>
 
-#include "../../vkhelper2/include/vkhelper2.h"
-#include "../../vkstatic/include/vkstatic.h"
+#include "../../vkhelper2/build/vkhelper2.h"
+#include "../../vkstatic/build/vkstatic.h"
 #include "../../modelobj/build/modelobj.h"
-#include "../include/camera.h"
 
-static const size_t VKBASIC3D_MAX_VERTEX = 100000;
+const static size_t vkbasic3d(max_vertex) = 100000;
+
+void vkbasic3d(pipeline_init)(Vkbasic3d() *vb3, VkDevice device);
+
+typedef struct {
+	float pos[4];
+	float color[4];
+	float normal[3];
+	int32_t layer;
+	float uv[2];
+} Vkbasic3d(Vertex);
+
+typedef struct {
+	mat4 view;
+	mat4 proj;
+	vec3 direction;
+} Vkbasic3d(Camera);
 
 typedef struct {
 	VkRenderPass renderpass;
@@ -16,30 +29,28 @@ typedef struct {
 	VkPipelineLayout ppll_model;
 	VkPipeline ppl_grid;
 	VkPipelineLayout ppll_grid;
-	Vkhelper2Buffer vbufc;
-	Vkhelper2Buffer vbufg;
+	Vkhelper2(Buffer) vbufc;
+	Vkhelper2(Buffer) vbufg;
 	uint32_t vlen;
 	bool vertex_update;
-	Vkhelper2Desc uniform;
-	Vkhelper2Buffer ubufg;
-	Vkhelper2Buffer ubufc;
-	Vkbasic3dCamera* camera; // mapped, no free
-} Vkbasic3d;
-void vkbasic3d_init(Vkbasic3d* vb3, Vkstatic* vks);
-void vkbasic3d_deinit(Vkbasic3d* vb3, VkDevice device);
-void vkbasic3d_build_command(
-	Vkbasic3d* vb3,
-	Vkstatic* vks,
+	Vkhelper2(Desc) uniform;
+	Vkhelper2(Buffer) ubufg;
+	Vkhelper2(Buffer) ubufc;
+	Vkbasic3d(Camera)* camera; // mapped, no free
+} Vkbasic3d();
+void vkbasic3d(init)(Vkbasic3d()* vb3, Vkstatic()* vks);
+void vkbasic3d(deinit)(Vkbasic3d()* vb3, VkDevice device);
+void vkbasic3d(build_command)(
+	Vkbasic3d()* vb3,
+	Vkstatic()* vks,
 	VkCommandBuffer commandbuffer,
 	VkFramebuffer framebuffer,
 	uint32_t width,
 	uint32_t height
 );
 
-void vkbasic3d_model_upload(
-	Vkstatic* vs,
-	Vkbasic3d* vb3,
-	Com_6e5dModelobj* model
+void vkbasic3d(model_upload)(
+	Vkstatic()* vs,
+	Vkbasic3d()* vb3,
+	Modelobj()* model
 );
-
-#endif

@@ -1,9 +1,5 @@
 #include <vulkan/vulkan.h>
 
-#include "../../modelobj/build/modelobj.h"
-#include "../../vkhelper2/include/vkhelper2.h"
-#include "../../vkstatic/include/vkstatic.h"
-#include "../include/vertex.h"
 #include "../include/vkbasic3d.h"
 
 static size_t chk(int32_t v) {
@@ -11,22 +7,22 @@ static size_t chk(int32_t v) {
 	return (size_t)v;
 }
 
-void vkbasic3d_model_upload(
-	Vkstatic* vs,
-	Vkbasic3d* vb3,
-	Com_6e5dModelobj* model
+void vkbasic3d(model_upload)(
+	Vkstatic()* vs,
+	Vkbasic3d()* vb3,
+	Modelobj()* model
 ) {
-	assert(model->v_len <= VKBASIC3D_MAX_VERTEX);
-	Vkbasic3dVertex* target;
+	assert(model->v_len <= vkbasic3d(max_vertex));
+	Vkbasic3d(Vertex)* target;
 	assert(0 == vkMapMemory(vs->device, vb3->vbufc.memory, 0,
 		vb3->vbufc.size, 0, (void**)&target));
 	for (size_t idx = 0; idx < model->f_len; idx += 1) {
-		Com_6e5dModelobjFace* f = &model->fs[idx];
+		Modelobj(Face)* f = &model->fs[idx];
 		for (size_t idy = 0; idy < 3; idy += 1) {
-			Vkbasic3dVertex* v = &target[idx * 3 + idy];
+			Vkbasic3d(Vertex)* v = &target[idx * 3 + idy];
 			size_t vid = chk(f->vids[idy]);
 			size_t nid = chk(f->nids[idy]);
-			*v = (Vkbasic3dVertex) {
+			*v = (Vkbasic3d(Vertex)) {
 				.color = {0.8f, 0.8f, 0.8f, 1.0f},
 			};
 			memcpy(v->pos, model->vs[vid], 12);
